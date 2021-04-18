@@ -2,6 +2,7 @@ import chess
 import random
 import numpy as np
 from _chess.ChessGame import who, from_move, mirror_move
+from stockfish import Stockfish
 
 class RandomPlayer():
     def __init__(self, game):
@@ -28,10 +29,14 @@ class HumanChessPlayer():
         pass
 
     def play(self, board):
-        human_move = input()
         mboard = board
         if board.turn:
             mboard = board.mirror()
+        print('Valid Moves', end=':')
+        for move in mboard.legal_moves:
+            print(move.uci(), end=',')
+        print()
+        human_move = input()
         move = move_from_uci(mboard, human_move.strip())
         if move is None:
             print('try again, e.g., %s' % random.choice(list(mboard.legal_moves)).uci())
@@ -41,5 +46,12 @@ class HumanChessPlayer():
         return from_move(move)
 
 class StockFishPlayer():
-    def __init__(self, game, elo):
-        pass
+    def __init__(self, game, elo=1000):
+        self.stockfish = Stockfish(parameters={"Threads": 2, "Minimum Thinking Time": 30})
+        self.stockfish.set_elo_rating(elo)
+
+    def play(self, board):
+        self.stockfish.set_fen_position(board.fen())
+        uci_move = self.stockfish.get_best_move()
+        move = move_from_uci(board, uci_move.strip())
+        return from_move(move)
