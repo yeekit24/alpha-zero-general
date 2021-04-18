@@ -33,6 +33,7 @@ SEVENTYFIVE_MOVES= 4
 FIVEFOLD_REPETITION= 5
 FIFTY_MOVES= 6
 THREEFOLD_REPETITION= 7
+
 class ChessGame(Game):
 
     def __init__(self, n=8):
@@ -111,7 +112,3 @@ class ChessGame(Game):
     @staticmethod
     def display(board):
         print(board)
-        print('Valid Moves', end=':')
-        for move in board.legal_moves:
-            print(move.uci(), end=',')
-        print()
