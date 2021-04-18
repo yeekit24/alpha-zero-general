@@ -53,5 +53,7 @@ class ChessNNet(nn.Module):
         pi = self.fc3(s)
         v = self.fc4(s)
 
+        # x= torch.from_numpy(valids).type(torch.FloatTensor).cuda()
+        # pi -= (1-x)*1000
         pi -= (1-valids)*1000
         return F.log_softmax(pi, dim=1), torch.tanh(v)
