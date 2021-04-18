@@ -40,7 +40,7 @@ class NNetWrapper(NeuralNet):
 
     def train(self, examples):
         """
-        examples: list of examples, each example is of form (board, pi, v)
+        examples: list of examples, each example is of form (board, pi, v, valids)
         """
         optimizer = optim.Adam(self.nnet.parameters())
 
@@ -58,7 +58,7 @@ class NNetWrapper(NeuralNet):
 
             while batch_idx < int(len(examples)/args.batch_size):
                 sample_ids = np.random.randint(len(examples), size=args.batch_size)
-                boards, pis, vs = list(zip(*[examples[i] for i in sample_ids]))
+                boards, pis, vs, valids = list(zip(*[examples[i] for i in sample_ids]))
                 boards = torch.FloatTensor(np.array(boards).astype(np.float64))
                 target_pis = torch.FloatTensor(np.array(pis))
                 target_vs = torch.FloatTensor(np.array(vs).astype(np.float64))
@@ -71,7 +71,7 @@ class NNetWrapper(NeuralNet):
                 data_time.update(time.time() - end)
 
                 # compute output
-                out_pi, out_v = self.nnet(boards)
+                out_pi, out_v = self.nnet((boards, valids))
                 l_pi = self.loss_pi(target_pis, out_pi)
                 l_v = self.loss_v(target_vs, out_v)
                 total_loss = l_pi + l_v
@@ -105,11 +105,12 @@ class NNetWrapper(NeuralNet):
             bar.finish()
 
 
-    def predict(self, board):
+    def predict(self, boardAndValid):
         """
         board: Chess.Board
         """
         # timing
+        board, valid = boardAndValid
         start = time.time()
 
         # preparing input
@@ -118,7 +119,7 @@ class NNetWrapper(NeuralNet):
         board = board.view(1, self.board_x, self.board_y, self.board_z)
         self.nnet.eval()
         with torch.no_grad():
-            pi, v = self.nnet(board)
+            pi, v = self.nnet((board, valid))
 
         #print('PREDICTION TIME TAKEN : {0:03f}'.format(time.time()-start))
         return torch.exp(pi).data.cpu().numpy()[0], v.data.cpu().numpy()[0]

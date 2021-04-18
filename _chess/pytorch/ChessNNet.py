@@ -38,7 +38,8 @@ class ChessNNet(nn.Module):
 
         self.fc4 = nn.Linear(512, 1)
 
-    def forward(self, s):
+    def forward(self, boardsAndValids):
+        s, valids = boardsAndValids
         s = s.view(-1, 1, self.board_x, self.board_y, self.board_z)
         s = F.relu(self.bn1(self.conv1(s)))
         s = F.relu(self.bn2(self.conv2(s)))
@@ -52,4 +53,5 @@ class ChessNNet(nn.Module):
         pi = self.fc3(s)
         v = self.fc4(s)
 
+        pi -= (1-valids)*1000
         return F.log_softmax(pi, dim=1), torch.tanh(v)
