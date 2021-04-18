@@ -85,7 +85,6 @@ class ChessGame(Game):
         # return 0 if not ended, 1 if player 1 won, -1 if player 1 lost
         outcome = board.outcome()
         if outcome is not None:
-            print(outcome.termination)
             if outcome.winner is None:
                 # draw return very little value
                 return 1e-4
