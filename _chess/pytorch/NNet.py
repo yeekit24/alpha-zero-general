@@ -62,6 +62,7 @@ class NNetWrapper(NeuralNet):
                 boards = torch.FloatTensor(np.array(boards).astype(np.float64))
                 target_pis = torch.FloatTensor(np.array(pis))
                 target_vs = torch.FloatTensor(np.array(vs).astype(np.float64))
+                target_valids = torch.FloatTensor(np.array(valids))
 
                 # predict
                 if args.cuda:
@@ -71,7 +72,7 @@ class NNetWrapper(NeuralNet):
                 data_time.update(time.time() - end)
 
                 # compute output
-                out_pi, out_v = self.nnet((boards, valids))
+                out_pi, out_v = self.nnet((boards, target_valids))
                 l_pi = self.loss_pi(target_pis, out_pi)
                 l_v = self.loss_v(target_vs, out_v)
                 total_loss = l_pi + l_v

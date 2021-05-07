@@ -90,7 +90,10 @@ class ChessGame(Game):
                 # draw return very little value
                 return 1e-4
             else:
-                return who(outcome.winner)
+                if outcome.winner == board.turn:
+                    return 1
+                else:
+                    return -1
         return 0
 
     def getCanonicalForm(self, board, player):
@@ -102,8 +105,6 @@ class ChessGame(Game):
           return board.mirror()
 
     def getSymmetries(self, board, pi):
-        #notsure
-        # mirror, rotational
         return [(board,pi)]
 
     def stringRepresentation(self, board):
