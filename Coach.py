@@ -120,7 +120,39 @@ class Coach():
             log.info('PITTING AGAINST PREVIOUS VERSION')
             arena = Arena(lambda x: np.argmax(pmcts.getActionProb(x, temp=0)),
                           lambda x: np.argmax(nmcts.getActionProb(x, temp=0)), self.game)
-            pwins, nwins, draws = arena.playGames(self.args.arenaCompare)
+
+            num = int(self.args.arenaCompare / 2)
+            oneWon = 0
+            twoWon = 0
+            draws = 0
+            for _ in tqdm(range(num), desc="Arena.playGames (1)"):
+                gameResult = arena.playGame(verbose=False)
+                if gameResult == 1:
+                    oneWon += 1
+                elif gameResult == -1:
+                    twoWon += 1
+                else:
+                    draws += 1
+                pmcts = MCTS(self.game, self.pnet, self.args)
+                nmcts = MCTS(self.game, self.nnet, self.args)
+
+            arena = Arena(lambda x: np.argmax(nmcts.getActionProb(x, temp=0)),
+                          lambda x: np.argmax(pmcts.getActionProb(x, temp=0)), self.game)
+
+            for _ in tqdm(range(num), desc="Arena.playGames (2)"):
+                gameResult = self.playGame(verbose=False)
+                if gameResult == -1:
+                    oneWon += 1
+                elif gameResult == 1:
+                    twoWon += 1
+                else:
+                    draws += 1
+                pmcts = MCTS(self.game, self.pnet, self.args)
+                nmcts = MCTS(self.game, self.nnet, self.args)
+
+            pwins = oneWon
+            nwins = twoWon
+
 
             log.info('NEW/PREV WINS : %d / %d ; DRAWS : %d' % (nwins, pwins, draws))
             if pwins + nwins == 0 or float(nwins) / (pwins + nwins) < self.args.updateThreshold:
@@ -159,3 +191,14 @@ class Coach():
 
             # examples based on the model were already collected (loaded)
             self.skipFirstSelfPlay = True
+
+    def playGames(self, num, verbose=False):
+        """
+        Plays num games in which player1 starts num/2 games and player2 starts
+        num/2 games.
+
+        Returns:
+            oneWon: games won by player1
+            twoWon: games won by player2
+            draws:  games won by nobody
+        """
