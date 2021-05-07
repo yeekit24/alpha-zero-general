@@ -140,7 +140,7 @@ class Coach():
                           lambda x: np.argmax(pmcts.getActionProb(x, temp=0)), self.game)
 
             for _ in tqdm(range(num), desc="Arena.playGames (2)"):
-                gameResult = self.playGame(verbose=False)
+                gameResult = arena.playGame(verbose=False)
                 if gameResult == -1:
                     oneWon += 1
                 elif gameResult == 1:

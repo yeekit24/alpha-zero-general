@@ -66,7 +66,7 @@ class NNetWrapper(NeuralNet):
 
                 # predict
                 if args.cuda:
-                    boards, target_pis, target_vs = boards.contiguous().cuda(), target_pis.contiguous().cuda(), target_vs.contiguous().cuda()
+                    boards, target_pis, target_vs, target_valids = boards.contiguous().cuda(), target_pis.contiguous().cuda(), target_vs.contiguous().cuda(), target_valids.contiguous().cuda()
 
                 # measure data loading time
                 data_time.update(time.time() - end)
@@ -116,7 +116,10 @@ class NNetWrapper(NeuralNet):
 
         # preparing input
         board = torch.FloatTensor(board.astype(np.float64))
-        if args.cuda: board = board.contiguous().cuda()
+        valid = torch.FloatTensor(valid.astype(np.float64))
+        if args.cuda:
+            board = board.contiguous().cuda()
+            valid = valid.contiguos().cuda()
         board = board.view(1, self.board_x, self.board_y, self.board_z)
         self.nnet.eval()
         with torch.no_grad():
