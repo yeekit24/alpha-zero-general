@@ -84,6 +84,7 @@ class MCTS():
             # leaf node
             valids = self.game.getValidMoves(canonicalBoard, 1)
             self.Ps[s], v = self.nnet.predict((self.game.toArray(canonicalBoard), valids))
+            if self.args.dir_noise: self.Ps[s] = (0.75 * self.Ps[s]) + (0.25 * np.random.dirichlet([self.args.dir_alpha] * len(self.Ps[s])))
             self.Ps[s] = self.Ps[s] * valids  # masking invalid moves
             sum_Ps_s = np.sum(self.Ps[s])
             if sum_Ps_s > 0:
