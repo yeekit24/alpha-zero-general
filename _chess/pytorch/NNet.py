@@ -119,7 +119,7 @@ class NNetWrapper(NeuralNet):
         valid = torch.FloatTensor(valid.astype(np.float64))
         if args.cuda:
             board = board.contiguous().cuda()
-            valid = valid.contiguos().cuda()
+            valid = valid.contiguous().cuda()
         board = board.view(1, self.board_x, self.board_y, self.board_z)
         self.nnet.eval()
         with torch.no_grad():
