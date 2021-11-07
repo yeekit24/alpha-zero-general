@@ -46,9 +46,15 @@ class HumanChessPlayer():
         return from_move(move)
 
 class StockFishPlayer():
-    def __init__(self, game, elo=1000):
-        self.stockfish = Stockfish(parameters={"Threads": 2, "Minimum Thinking Time": 30})
+    def __init__(self, game, elo=1000, skill_level=10, depth=10, think_time=30):
+        """
+        elo does not matter
+        only skilllevel, depth is the main factor affect winrate
+        """
+        self.stockfish = Stockfish(parameters={"Threads": 2, "Minimum Thinking Time": think_time})
         self.stockfish.set_elo_rating(elo)
+        self.stockfish.set_skill_level(skill_level)
+        self.stockfish.set_depth(depth)
 
     def play(self, board):
         self.stockfish.set_fen_position(board.fen())

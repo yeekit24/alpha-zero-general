@@ -13,6 +13,8 @@ from NeuralNet import NeuralNet
 
 import argparse
 import torch
+from torch.utils.tensorboard import SummaryWriter
+writer = SummaryWriter()
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
@@ -20,8 +22,9 @@ from torchvision import datasets, transforms
 
 from .ChessNNet import ChessNNet as onnet
 
+
 args = dotdict({
-    'lr': 0.002,
+    'lr': 0.02,
     'dropout': 0.3,
     'epochs': 10,
     'batch_size': 64,
@@ -80,7 +83,9 @@ class NNetWrapper(NeuralNet):
                 # record loss
                 pi_losses.update(l_pi.item(), boards.size(0))
                 v_losses.update(l_v.item(), boards.size(0))
-
+                writer.add_scalar("Loss/train", l_pi.item(), batch_idx)
+                writer.add_scalar("Loss/train", l_v.item(), batch_idx)
+                writer.flush()
                 # compute gradient and do SGD step
                 optimizer.zero_grad()
                 total_loss.backward()
@@ -153,3 +158,7 @@ class NNetWrapper(NeuralNet):
         map_location = None if args.cuda else 'cpu'
         checkpoint = torch.load(filepath, map_location=map_location)
         self.nnet.load_state_dict(checkpoint['state_dict'])
+
+    def print(self, game):
+        device = 'cuda' if torch.cuda.is_available() else 'cpu'
+        print(onnet(game, args).to(device))

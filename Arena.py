@@ -1,6 +1,7 @@
 import logging
 
 from tqdm import tqdm
+import asyncio
 
 log = logging.getLogger(__name__)
 
@@ -62,7 +63,7 @@ class Arena():
             self.display(board)
         return curPlayer * self.game.getGameEnded(board, curPlayer)
 
-    def playGames(self, num, verbose=False):
+    def playGames(self, p1, p2, num, verbose=False):
         """
         Plays num games in which player1 starts num/2 games and player2 starts
         num/2 games.
@@ -85,6 +86,9 @@ class Arena():
                 twoWon += 1
             else:
                 draws += 1
+            self.player_1 = p1
+            self.player_2 = p2
+
 
         self.player1, self.player2 = self.player2, self.player1
 
@@ -96,5 +100,6 @@ class Arena():
                 twoWon += 1
             else:
                 draws += 1
-
+            self.player1 = p2
+            self.player2 = p1
         return oneWon, twoWon, draws

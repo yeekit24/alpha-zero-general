@@ -10,5 +10,6 @@ checkpoints/
 
 # For PyCharm users
 .idea/
-
 venv3/
+runs/
+pretrained_models/
