@@ -22,11 +22,15 @@ class ChessNNet(nn.Module):
         self.conv2 = nn.Conv3d(args.num_channels, args.num_channels, 3, stride=1, padding=1)
         self.conv3 = nn.Conv3d(args.num_channels, args.num_channels, 3, stride=1)
         self.conv4 = nn.Conv3d(args.num_channels, args.num_channels, 3, stride=1)
+        self.conv5 = nn.Conv3d(args.num_channels, args.num_channels, 3, stride=1)
+        self.conv6 = nn.Conv3d(args.num_channels, args.num_channels, 3, stride=1)
 
         self.bn1 = nn.BatchNorm3d(args.num_channels)
         self.bn2 = nn.BatchNorm3d(args.num_channels)
         self.bn3 = nn.BatchNorm3d(args.num_channels)
         self.bn4 = nn.BatchNorm3d(args.num_channels)
+        self.bn5 = nn.BatchNorm3d(args.num_channels)
+        self.bn6 = nn.BatchNorm3d(args.num_channels)
 
         self.fc1 = nn.Linear(args.num_channels*(self.board_x-4)*(self.board_y-4)*(self.board_z-4), 1024)
         self.fc_bn1 = nn.BatchNorm1d(1024)
@@ -35,8 +39,10 @@ class ChessNNet(nn.Module):
         self.fc_bn2 = nn.BatchNorm1d(512)
 
         self.fc3 = nn.Linear(512, self.action_size)
+        self.fc4 = nn.Linear(512, self.action_size)
+        self.fc5 = nn.Linear(512, self.action_size)
 
-        self.fc4 = nn.Linear(512, 1)
+        self.fc6 = nn.Linear(512, 1)
 
     def forward(self, boardsAndValids):
         s, valids = boardsAndValids
@@ -45,13 +51,18 @@ class ChessNNet(nn.Module):
         s = F.relu(self.bn2(self.conv2(s)))
         s = F.relu(self.bn3(self.conv3(s)))
         s = F.relu(self.bn4(self.conv4(s)))
+        s = F.relu(self.bn5(self.conv5(s)))
+        s = F.relu(self.bn6(self.conv6(s)))
         s = s.view(-1, self.args.num_channels*(self.board_x-4)*(self.board_y-4)*(self.board_z-4))
 
         s = F.dropout(F.relu(self.fc_bn1(self.fc1(s))), p=self.args.dropout, training=self.training)
         s = F.dropout(F.relu(self.fc_bn2(self.fc2(s))), p=self.args.dropout, training=self.training)
+        s = F.dropout(F.relu(self.fc_bn3(self.fc3(s))), p=self.args.dropout, training=self.training)
+        s = F.dropout(F.relu(self.fc_bn4(self.fc4(s))), p=self.args.dropout, training=self.training)
 
-        pi = self.fc3(s)
-        v = self.fc4(s)
+
+        pi = self.fc5(s)
+        v = self.fc6(s)
 
         # x= torch.from_numpy(valids).type(torch.FloatTensor).cuda()
         # pi -= (1-x)*1000
